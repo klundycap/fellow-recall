@@ -2,7 +2,7 @@ import re,shutil,os,json,sys
 from PIL import Image,ImageDraw
 here=os.path.dirname(os.path.abspath(__file__))
 src=open(os.path.join(here,"claude-artifact.html")).read()
-out=os.path.join(here,"www");os.makedirs(out,exist_ok=True)
+out=os.path.dirname(here)  # app lives at the repo root
 VERSION=sys.argv[1] if len(sys.argv)>1 else "1"
 def rep(s,old,new):
     assert s.count(old)==1,(old[:60],s.count(old));return s.replace(old,new)
@@ -53,8 +53,7 @@ window.addEventListener("pagehide",''')
 s=rep(s,'<script>\n"use strict";','<script src="anthropic-sdk.js?v='+VERSION+'"></script>\n<script src="shim.js?v='+VERSION+'"></script>\n<script>\n"use strict";')
 s+='\n</body>\n</html>\n'
 open(os.path.join(out,"index.html"),"w").write(s)
-shutil.copy(os.path.join(here,"shim.js"),out)
-shutil.copy(os.path.join(here,"..","sdkbuild","anthropic-sdk.js"),out)
+# shim.js and anthropic-sdk.js live at the repo root and are edited there
 json.dump({"name":"Fellow Recall","short_name":"Recall","description":"Pain medicine flashcards with recall and clinic faces.",
  "start_url":"./","scope":"./","display":"standalone","orientation":"portrait","background_color":"#EEF1F5","theme_color":"#3D47D9",
  "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"},
