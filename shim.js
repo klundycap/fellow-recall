@@ -45,17 +45,23 @@ function parseJson(text){
 }
 async function ask(prompt,opts){
   opts=opts||{};
-  let msg;
-  try{
-    msg=await getClient().beta.messages.create({
-      model:MODEL,max_tokens:16000,
+  let msg;const messages=[{role:"user",content:prompt}];
+  const req={model:MODEL,max_tokens:16000,
       output_config:{effort:opts.modelTier==="quick"?"low":"medium"},
-      betas:["server-side-fallback-2026-07-01"],fallbacks:"default",
-      messages:[{role:"user",content:typeof prompt==="string"?prompt:prompt}]
-    });
+      betas:["server-side-fallback-2026-07-01"],fallbacks:"default",messages};
+  // Ask: let Claude search PubMed so citations and PMIDs are real
+  if(opts.web)req.tools=[{type:"web_search_20260209",name:"web_search",max_uses:6,allowed_domains:["pubmed.ncbi.nlm.nih.gov","ncbi.nlm.nih.gov"]}];
+  try{
+    for(let round=0;round<5;round++){
+      msg=await getClient().beta.messages.create(req);
+      if(msg.stop_reason!=="pause_turn")break;
+      messages.push({role:"assistant",content:msg.content});   // server tool paused mid-turn: resume it
+    }
   }catch(e){throw mapErr(e)}
   if(msg.stop_reason==="refusal")throw {code:"refused",message:"Declined"};
-  const text=(msg.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
+  // with web search the final answer comes after the tool blocks; keep only text after the last tool result
+  const blocks=msg.content||[];let lastTool=-1;blocks.forEach((b,i)=>{if(b.type!=="text")lastTool=i});
+  const text=blocks.slice(lastTool+1).filter(b=>b.type==="text").map(b=>b.text).join("")||blocks.filter(b=>b.type==="text").map(b=>b.text).join("");
   if(!text)throw {code:"empty_completion",message:"No text"};
   return {text,truncated:msg.stop_reason==="max_tokens"};
 }

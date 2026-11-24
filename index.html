@@ -16,6 +16,7 @@
 <style>
 /* Layout: single phone column, card-centric study surface, fixed bottom tab bar, bottom sheets for editing */
 :root{
+  --c-recall:#3D47D9; --c-clinic:#C46A12;
   --bg:#EEF1F5; --surface:#FFFFFF; --surface-2:#F5F7FA; --line:#DCE1E8;
   --fg:#141A24; --muted:#5D6778;
   --recall:#3D47D9; --recall-soft:#E6E8FC;
@@ -33,7 +34,7 @@
   --recall:#8D94FF; --recall-soft:#232850;
   --clinic:#F0A35A; --clinic-soft:#3A2814;
   --again:#F07A70; --hard:#E0B458; --good:#5FC892; --easy:#8D94FF;
-  --on-accent:#0D1118; --scrim:rgba(0,0,0,.6);
+  --on-accent:#0D1118; --scrim:rgba(0,0,0,.6); --c-recall:#7C84F2; --c-clinic:#C97D36;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0D1118; --surface:#161C26; --surface-2:#1C2330; --line:#2A3342;
@@ -41,7 +42,7 @@
   --recall:#8D94FF; --recall-soft:#232850;
   --clinic:#F0A35A; --clinic-soft:#3A2814;
   --again:#F07A70; --hard:#E0B458; --good:#5FC892; --easy:#8D94FF;
-  --on-accent:#0D1118; --scrim:rgba(0,0,0,.6);
+  --on-accent:#0D1118; --scrim:rgba(0,0,0,.6); --c-recall:#7C84F2; --c-clinic:#C97D36;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -149,7 +150,7 @@ textarea{min-height:120px;resize:vertical;line-height:1.45}
 
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);
   padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-nav.tabs .in{max-width:460px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+nav.tabs .in{max-width:460px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
 nav.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11px;font-weight:600;color:var(--muted);border-radius:10px}
 nav.tabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav.tabs button[aria-current=page]{color:var(--fg);background:var(--surface-2)}
@@ -166,6 +167,41 @@ nav.tabs button[aria-current=page]{color:var(--fg);background:var(--surface-2)}
 .review .kind{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--hard)}
 .review .kind.cue{color:var(--again)}
 .field.changed textarea,.field.changed input{border-color:var(--good);box-shadow:0 0 0 1px var(--good)}
+.studybar{display:flex;justify-content:space-between;align-items:center;min-height:30px;margin-bottom:8px}
+.backbtn{border:0;background:none;color:var(--muted);font-weight:600;font-size:13px;padding:4px 2px;display:inline-flex;align-items:center;gap:4px}
+.backbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pm{font-size:12px;color:var(--recall);font-weight:600;text-decoration:none;white-space:nowrap}
+.pm:hover{text-decoration:underline}
+.ev{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ev h3{font-family:var(--f-display);font-size:15px;margin:0}
+.ev ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:10px}
+.ev li{font-size:13.5px;line-height:1.45}
+.ev .cite{font-weight:600}
+.ev .tags{display:flex;gap:6px;flex-wrap:wrap;margin:3px 0}
+.q-chip{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:var(--surface-2);color:var(--muted)}
+.q-chip.high{color:var(--good)}.q-chip.moderate{color:var(--hard)}.q-chip.low,.q-chip.very-low{color:var(--again)}
+.ev .bias{color:var(--muted)}
+/* stats */
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.chartcard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 14px 10px;margin-bottom:12px;position:relative}
+.chartcard h2{font-size:15px}
+.chartcard .cap{font-size:12px;color:var(--muted);margin:2px 0 8px}
+.chartcard svg{display:block;width:100%;height:auto;overflow:visible}
+.chartcard svg text{fill:var(--muted);font-family:var(--f-body);font-size:10px}
+.chartcard svg .lbl{fill:var(--fg);font-weight:600}
+.chartcard svg .grid{stroke:var(--line);stroke-width:1}
+.chartcard svg [data-tip]{cursor:pointer}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:4px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.tip{position:absolute;z-index:4;pointer-events:none;background:var(--fg);color:var(--bg);font-size:12px;line-height:1.35;padding:6px 9px;border-radius:8px;white-space:nowrap;box-shadow:var(--shadow);transform:translate(-50%,-100%)}
+.heat{max-width:300px;display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px}
+.heat i{aspect-ratio:1;border-radius:3px;background:var(--surface-2);border:1px solid var(--line)}
+.heat i.l1{background:color-mix(in srgb,var(--c-recall) 25%,var(--surface));border-color:transparent}
+.heat i.l2{background:color-mix(in srgb,var(--c-recall) 50%,var(--surface));border-color:transparent}
+.heat i.l3{background:color-mix(in srgb,var(--c-recall) 75%,var(--surface));border-color:transparent}
+.heat i.l4{background:var(--c-recall);border-color:transparent}
+.heatkey{display:flex;align-items:center;gap:3px;justify-content:flex-end;font-size:11px;color:var(--muted);margin-top:6px}
+.heatkey i{width:10px;height:10px;border-radius:2px;display:inline-block}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--recall);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -189,6 +225,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
     </div>
     <div class="areas" id="areaChips" role="group" aria-label="Study one topic area"></div>
     <div class="progress"><i id="prog" style="width:0%"></i></div>
+    <div class="studybar"><button class="backbtn" type="button" id="backBtn" hidden aria-keyshortcuts="Backspace"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Last card</button><span></span></div>
     <div id="studyArea"><div class="card"><div class="empty"><div class="big">Loading</div><p>Fetching your cards.</p></div></div></div>
   </section>
 
@@ -204,7 +241,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
         <button type="button">Duloxetine vs pregabalin for painful diabetic neuropathy?</button>
       </div>
       <div class="row"><button class="primary" type="submit" id="askBtn">Draft cards</button></div>
-      <p class="note">Claude answers from what it already knows and can't search the web. Check numbers and citations before you rely on them.</p>
+      <p class="note" id="askNote">Claude answers from peer-reviewed studies it already knows, but it can't search the web here. Check numbers and citations before you rely on them.</p>
     </form>
     <div class="out" id="askOut"></div>
   </section>
@@ -222,6 +259,12 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
     <div class="out" id="distillOut"></div>
   </section>
 
+  <!-- STATS -->
+  <section class="view" id="v-stats" hidden>
+    <header class="top"><div><h1>Stats</h1><p class="sub">How your reviews are going, and how steady you've been.</p></div></header>
+    <div id="statsBody"></div>
+  </section>
+
   <!-- DECK -->
   <section class="view" id="v-deck" hidden>
     <header class="top"><div><h1>Deck</h1><p class="sub" id="deckSub">Blue is the recall face, amber is the clinic face.</p></div>
@@ -229,7 +272,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
     <div class="toolbar">
       <input type="search" id="deckSearch" placeholder="Search cards" aria-label="Search cards">
       <select id="deckFilter" aria-label="Filter" style="width:auto">
-        <option value="all">All</option><option value="due">Due</option><option value="noclinic">No clinic face</option><option value="new">New</option>
+        <option value="all">All</option><option value="recent">Last 50 added</option><option value="due">Due</option><option value="noclinic">No clinic face</option><option value="new">New</option>
       </select>
     </div>
     <div class="toolbar">
@@ -281,13 +324,14 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
   <button type="button" data-v="study" aria-current="page"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="13" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg>Study</button>
   <button type="button" data-v="ask"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>Ask</button>
   <button type="button" data-v="distill"><svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h4"/></svg>Distill</button>
+  <button type="button" data-v="stats"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Stats</button>
   <button type="button" data-v="deck"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Deck</button>
 </div></nav>
 
 <div id="sheetRoot"></div>
 
-<script src="anthropic-sdk.js?v=2"></script>
-<script src="shim.js?v=2"></script>
+<script src="anthropic-sdk.js?v=3"></script>
+<script src="shim.js?v=3"></script>
 <script>
 "use strict";
 const use=n=>{try{return window.claude?Promise.resolve(window.claude.use(n)).catch(()=>null):Promise.resolve(null)}catch(e){return Promise.resolve(null)}};
@@ -325,6 +369,13 @@ function guessArea(f){
   return best;
 }
 const validArea=a=>a&&AREA_NAME[a]?a:null;
+const cleanPmid=x=>{const m=String(x||"").match(/\b(\d{5,9})\b/);return m?m[1]:""};
+const NO_PM=/^(anki|openevidence summary|starter|manual)?$/i;
+function pubmedLink(f){
+  if(f.pmid)return `<a class="pm" href="https://pubmed.ncbi.nlm.nih.gov/${encodeURIComponent(f.pmid)}/" target="_blank" rel="noopener noreferrer">PubMed ↗</a>`;
+  const q=(f.pmq||f.src||"").trim();if(!q||NO_PM.test(q))return "";
+  return `<a class="pm" href="https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Find on PubMed ↗</a>`;
+}
 let studyArea="all";
 
 /* ---------- data model ----------
@@ -441,8 +492,25 @@ function buildQueue(){
   if(due.length&&room){const n=fresh.slice(0,room).map(f=>f.id),r=[...lapsed,...due].map(f=>f.id);queue=[];let i=0,j=0;while(i<r.length||j<n.length){if(i<r.length)queue.push(r[i++]);if(i<r.length)queue.push(r[i++]);if(j<n.length)queue.push(n[j++])}}
   if(cur)queue=queue.filter(id=>id!==cur.id);
 }
+let history=[];
+function logReview(f,fc,ok,sign){
+  const d=String(today());const L=meta.log||(meta.log={});const e=L[d]||(L[d]={n:0,ok:0,r:[0,0],c:[0,0],a:{}});
+  const k=fc==="clinic"?"c":"r";const ar=f.area||"none";const A=e.a[ar]||(e.a[ar]=[0,0]);
+  e.n+=sign;e[k][0]+=sign;A[0]+=sign;if(ok){e.ok+=sign;e[k][1]+=sign;A[1]+=sign}
+  const keys=Object.keys(L);if(keys.length>400)keys.sort((a,b)=>a-b).slice(0,keys.length-400).forEach(x=>delete L[x]);
+  touchMeta();
+}
+function undoLast(){
+  const h=history.pop();if(!h)return;const f=facts.get(h.id);if(!f){renderStudy();return}
+  f.s=h.prev;meta.newLog.count=h.newCount;queue=h.queue;
+  done--;if(h.ok)good--;logReview(f,h.face,h.ok,-1);
+  cur=f;face=h.face;shown=true;upsert(f);renderStudy();
+}
 function grade(g){
   if(!cur)return;
+  history.push({id:cur.id,prev:JSON.parse(JSON.stringify(sched(cur))),face,ok:g!=="again",newCount:meta.newLog.count,queue:[...queue]});
+  if(history.length>30)history.shift();
+  logReview(cur,face,g!=="again",1);
   const s=sched(cur),iv=nextIvl(s,g),wasNew=s.reps===0&&!s.lapses;
   if(wasNew){meta.newLog.count++;touchMeta()}
   if(g==="again"){s.ease=Math.max(1.3,s.ease-.2);if(s.reps>0)s.lapses++;else s.lapses=Math.max(s.lapses,1);s.reps=0;s.ivl=0;s.due=today();queue.splice(Math.min(3,queue.length),0,cur.id)}
@@ -461,9 +529,10 @@ function renderChips(){
     .concat(AREAS.filter(a=>cnt[a[0]]).map(a=>[a[0],a[1],dueC[a[0]]||0]));
   if(unsorted)chips.push(["none","Unsorted",dueC.none||0]);
   el.innerHTML=chips.map(([k,n,d])=>`<button type="button" data-a="${k}" aria-pressed="${studyArea===k}">${esc(n)}${d?`<span class="c">${d}</span>`:""}</button>`).join("");
-  el.querySelectorAll("button").forEach(b=>b.onclick=()=>{studyArea=b.dataset.a;cur=null;buildQueue();showNext();const on=el.querySelector('[aria-pressed=true]');if(on)on.scrollIntoView({block:"nearest",inline:"nearest"})});
+  el.querySelectorAll("button").forEach(b=>b.onclick=()=>{studyArea=b.dataset.a;cur=null;history=[];buildQueue();showNext();const on=el.querySelector('[aria-pressed=true]');if(on)on.scrollIntoView({block:"nearest",inline:"nearest"})});
 }
 function renderStudy(){
+  $("#backBtn").hidden=!history.length;
   const left=queue.length+(cur?1:0);
   $("#sDue").textContent=left;$("#sDone").textContent=done;
   $("#sAcc").textContent=done?Math.round(good/done*100)+"%":"–";
@@ -486,7 +555,7 @@ function renderStudy(){
     <div class="meta"><span class="chip ${face}"><span class="dot"></span>${c?"Clinic":"Recall"}</span><span class="topic">${esc([f.area?AREA_NAME[f.area]:"",f.topic].filter(Boolean).join(" · "))}${s.reps===0&&!s.lapses?" · new":""}</span></div>
     ${c?`<div class="stem"><span class="where">${esc(side.where||"Clinic")}</span>${esc(side.stem)}</div>`:""}
     <div class="q">${esc(side.q)}</div>
-    ${shown?`<div class="ans"><p>${esc(side.a)}</p>${f.src?`<p class="src">${esc(f.src)}</p>`:""}</div>`:""}
+    ${shown?`<div class="ans"><p>${esc(side.a)}</p>${f.src||f.pmid?`<div class="cardfoot"><p class="src" style="margin:0">${esc(f.src||"")}</p>${pubmedLink(f)}</div>`:""}</div>`:""}
     <div class="cardfoot"><span></span><button class="link" type="button" id="editCur">Edit card</button></div>
   </div></article>
   <div style="margin-top:14px">${shown?`<div class="rate">${["again","hard","good","easy"].map((g,i)=>`<button type="button" class="${g}" data-g="${g}" aria-keyshortcuts="${i+1}"><span>${g[0].toUpperCase()+g.slice(1)}</span><span>${fmtIvl(nextIvl(s,g))}</span></button>`).join("")}</div>
@@ -496,8 +565,10 @@ function renderStudy(){
   if(!shown)$("#revealBtn").onclick=()=>{shown=true;renderStudy()};
   else area.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>grade(b.dataset.g));
 }
+$("#backBtn").onclick=undoLast;
 document.addEventListener("keydown",e=>{
   if($("#v-study").hidden||$(".sheet-wrap")||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName))return;
+  if(history.length&&(e.key==="Backspace"||e.key==="z")){e.preventDefault();undoLast();return}
   if(!cur)return;
   if(!shown&&(e.key===" "||e.key==="Enter")){e.preventDefault();shown=true;renderStudy()}
   else if(shown&&"1234".includes(e.key)&&e.key.length===1){grade(["again","hard","good","easy"][+e.key-1])}
@@ -509,6 +580,7 @@ const ERR={not_granted:"Claude access was turned down for this page. Reload the 
 ERR.no_key="Add your Claude API key in Deck › Claude API key first.";ERR.bad_key="Your API key was rejected. Check it in Deck › Claude API key.";ERR.offline="No internet connection. Studying works offline, but drafting cards needs a connection.";ERR.invalid_request="Claude couldn't accept that request. Try a shorter text or check your account's credit.";
 const errMsg=e=>ERR[e&&e.code]||"Couldn't reach Claude"+(e&&e.code?" ("+e.code+")":"")+". Try again.";
 
+const PM_RULE=`"pmid": the PubMed ID of the single study the card rests on, ONLY if you read it in a PubMed search result in this conversation; otherwise "". "pubmed_query": a PubMed search string that finds that study (first author surname, 3-5 title words, journal abbreviation, year), or "" for a guideline or textbook fact.`;
 const CARD_RULES=`You write flashcards for a physician in an ACGME pain medicine fellowship, at pain board-exam level.
 Every FACT gets two faces that test the SAME knowledge:
 1. "recall": a bare, context-free question and a concise answer (max 45 words). It tests one discrete, practice-relevant item: a threshold, dose, drug choice, diagnostic criterion, contraindication, or trial result.
@@ -517,14 +589,15 @@ Every FACT gets two faces that test the SAME knowledge:
    - "stem": a 2-3 sentence vignette: age/sex, the relevant history, and the one decisive detail. Never name the concept or answer being tested.
    - "q": what the fellow does, says, or concludes.
    - "a": the decision plus a one-line reason (max 45 words).
-Rules: prefer guideline thresholds, landmark trial numbers, safety pitfalls, and decisions that change management. One fact per card; lists of at most 4 items. Never invent citations: cite only guidelines or trials you are confident exist, as "Author or Society, Journal Year". If you are unsure of a number, leave it out. "topic" is 1-3 words. "area" is the best-fitting board topic area, one key from: ${AREA_LIST_TEXT}. "confidence" is how sure you are the fact is accurate and current: "high", "moderate" or "low".`;
-const FACT_SHAPE=`{"topic":"","area":"","recall":{"q":"","a":""},"clinic":{"where":"","stem":"","q":"","a":""},"src":"","confidence":"high"}`;
+Rules: prefer guideline thresholds, landmark trial numbers, safety pitfalls, and decisions that change management. One fact per card; lists of at most 4 items. Never invent citations: cite only guidelines or trials you are confident exist, as "Author or Society, Journal Year". If you are unsure of a number, leave it out. "topic" is 1-3 words. "area" is the best-fitting board topic area, one key from: ${AREA_LIST_TEXT}. ${PM_RULE} "confidence" is how sure you are the fact is accurate and current: "high", "moderate" or "low".`;
+const FACT_SHAPE=`{"topic":"","area":"","recall":{"q":"","a":""},"clinic":{"where":"","stem":"","q":"","a":""},"src":"","pmid":"","pubmed_query":"","confidence":"high"}`;
 
-async function runSample(prompt,statusEl,btn,tier){
+async function runSample(prompt,statusEl,btn,tier,web){
   await sampleReady;
   if(!sampleFn){statusEl.className="status err";statusEl.textContent="Claude isn't available here. Open this page in claude.ai or the Claude app while signed in.";return null}
   btn.disabled=true;statusEl.className="status";statusEl.innerHTML=`<span class="spinner"></span>Thinking. This usually takes 10 to 40 seconds.`;
-  try{const r=await sampleFn.json(prompt,{modelTier:tier||"default"});statusEl.textContent="";return r}
+  if(web&&window.FR_STANDALONE)statusEl.innerHTML=`<span class="spinner"></span>Searching PubMed and reading studies. This can take a minute or two.`;
+  try{const o={modelTier:tier||"default"};if(web&&window.FR_STANDALONE)o.web=true;const r=await sampleFn.json(prompt,o);statusEl.textContent="";return r}
   catch(e){statusEl.className="status err";statusEl.textContent=errMsg(e);return null}
   finally{btn.disabled=false}
 }
@@ -532,6 +605,15 @@ async function runSample(prompt,statusEl,btn,tier){
 function renderDrafts(outEl,res,origin){
   outEl.innerHTML="";
   if(res.summary){const s=document.createElement("div");s.className="summary";s.textContent=res.summary;outEl.appendChild(s)}
+  const ev=Array.isArray(res.evidence)?res.evidence.filter(x=>x&&x.citation):[];
+  if(ev.length){
+    const b=document.createElement("div");b.className="ev";
+    const qk=x=>String(x||"").toLowerCase().replace(/\s+/g,"-");
+    b.innerHTML=`<div class="meta"><h3>Evidence</h3>${res.certainty?`<span class="q-chip ${esc(qk(res.certainty))}">Overall: ${esc(res.certainty)}</span>`:""}</div><ol>${ev.map(x=>{const pm=cleanPmid(x.pmid);
+      const link=pm?`<a class="pm" href="https://pubmed.ncbi.nlm.nih.gov/${pm}/" target="_blank" rel="noopener noreferrer">PubMed ↗</a>`:`<a class="pm" href="https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(x.citation)}" target="_blank" rel="noopener noreferrer">Find on PubMed ↗</a>`;
+      return `<li><span class="cite">${esc(x.citation)}</span> ${link}<div class="tags">${x.design?`<span class="q-chip">${esc(x.design)}</span>`:""}${x.n?`<span class="q-chip">n = ${esc(x.n)}</span>`:""}${x.quality?`<span class="q-chip ${esc(qk(x.quality))}">${esc(x.quality)} quality</span>`:""}</div>${esc(x.finding||"")}${x.bias?`<div class="bias">Bias: ${esc(x.bias)}</div>`:""}</li>`}).join("")}</ol>`;
+    outEl.appendChild(b);
+  }
   const list=(res.facts||[]).filter(f=>f&&f.recall&&f.recall.q);
   if(!list.length){const p=document.createElement("p");p.className="status";p.textContent="No cards came back. Try a more specific question.";outEl.appendChild(p);return}
   list.forEach(f=>{
@@ -547,16 +629,17 @@ function renderDrafts(outEl,res,origin){
         <span class="flab">Question</span><textarea data-k="cq" rows="2" aria-label="Clinic question"></textarea>
         <span class="flab">Answer</span><textarea data-k="ca" rows="3" aria-label="Clinic answer"></textarea></div>
       <span class="flab">Source</span><input type="text" data-k="src" aria-label="Source">
+      <span class="flab">PubMed ID</span><input type="text" data-k="pmid" inputmode="numeric" aria-label="PubMed ID">
       <div class="row"><button class="ghost" type="button" data-x="discard">Discard</button><button class="primary" type="button" data-x="save">Add to deck</button></div>`;
     const set=(k,v)=>{d.querySelector(`[data-k=${k}]`).value=v||""};
-    set("rq",f.recall.q);set("ra",f.recall.a);set("cw",c.where);set("cs",c.stem);set("cq",c.q);set("ca",c.a);set("src",f.src);
+    set("rq",f.recall.q);set("ra",f.recall.a);set("cw",c.where);set("cs",c.stem);set("cq",c.q);set("ca",c.a);set("src",f.src);set("pmid",cleanPmid(f.pmid));
     d.querySelectorAll("textarea").forEach(autoGrow);
     d.querySelector("[data-x=discard]").onclick=()=>d.remove();
     d.querySelector("[data-x=save]").onclick=e=>{
       const v=k=>d.querySelector(`[data-k=${k}]`).value.trim();
       if(!v("rq")||!v("ra")){toast("The recall face needs a question and an answer.");return}
       const hasC=v("cs")&&v("cq")&&v("ca");
-      const nf={id:uid(),topic:f.topic||"",area:validArea(f.area),areaSrc:"claude",tags:[],recall:{q:v("rq"),a:v("ra")},clinic:hasC?{where:v("cw")||"Clinic",stem:v("cs"),q:v("cq"),a:v("ca")}:null,src:v("src"),origin,created:Date.now(),s:null};
+      const nf={id:uid(),topic:f.topic||"",area:validArea(f.area),areaSrc:"claude",tags:[],recall:{q:v("rq"),a:v("ra")},clinic:hasC?{where:v("cw")||"Clinic",stem:v("cs"),q:v("cq"),a:v("ca")}:null,src:v("src"),pmid:cleanPmid(v("pmid")),pmq:String(f.pubmed_query||""),origin,created:Date.now(),s:null};
       sched(nf);upsert(nf);
       e.target.textContent="Added";e.target.disabled=true;d.querySelectorAll("textarea,input").forEach(x=>x.disabled=true);
       toast("Added to your deck");buildQueue();if(!cur)showNext();
@@ -569,13 +652,23 @@ function autoGrow(t){const f=()=>{t.style.height="auto";t.style.height=t.scrollH
 $("#askForm").onsubmit=async e=>{
   e.preventDefault();const q=$("#askInput").value.trim();if(!q){$("#askInput").focus();return}
   const out=$("#askOut");out.innerHTML='<p class="status"></p>';
+  const WEB=!!window.FR_STANDALONE;
   const r=await runSample(`${CARD_RULES}
 
 The fellow asked: "${q}"
 
-First write "summary": 3 to 5 plain sentences answering the question, naming the key studies or guidelines and the overall strength of evidence (high, moderate, low or very low). Then choose the 1 or 2 facts from that answer most useful in day-to-day practice and write them as cards.
+EVIDENCE RULES (these override everything else):
+- Base the answer ONLY on peer-reviewed medical journal literature: randomized trials, systematic reviews and meta-analyses, observational studies, and society guidelines published in peer-reviewed journals. Do not use or cite textbooks, websites, news, industry material, conference abstracts, or preprints.
+- ${WEB?"Use web search on PubMed to find the key studies before answering, and take each PMID from the pubmed.ncbi.nlm.nih.gov URL you actually saw. Prefer the highest level of evidence: systematic reviews and RCTs first.":"You cannot search. Cite only studies you are confident exist, with first author, journal and year; leave \"pmid\" empty."}
+- Rate each study's evidence quality with GRADE terms (high, moderate, low, very low) and name its main sources of bias (for example: no blinding or sham control, small sample, short follow-up, industry funding, high dropout, selective outcome reporting, open-label design, surrogate outcomes).
+- If good evidence is thin, say so plainly. Never fill gaps with guesses.
+
+Write:
+- "summary": 3 to 5 plain sentences answering the question and stating the overall certainty of evidence (GRADE), and what drives it.
+- "evidence": the 2 to 5 most important studies, best evidence first.
+- "facts": the 1 or 2 practice-relevant facts from that evidence, written as cards. Each fact's "src" names its study; give its "pmid" and "pubmed_query".
 Reply with JSON only, no prose around it, in this shape:
-{"summary":"","facts":[${FACT_SHAPE}]}`,out.firstChild,$("#askBtn"));
+{"summary":"","certainty":"high|moderate|low|very low","evidence":[{"citation":"First author, Journal Year","design":"e.g. RCT, sham-controlled","n":"","finding":"one sentence with the key numbers","quality":"high|moderate|low|very low","bias":"main limitations","pmid":""}],"facts":[${FACT_SHAPE}]}`,out.firstChild,$("#askBtn"),"default",true);
   if(r)renderDrafts(out,r,"ask");
 };
 $("#distillForm").onsubmit=async e=>{
@@ -646,6 +739,7 @@ function renderDeck(){
   if(flt==="noclinic")list=list.filter(f=>!f.clinic);
   if(flt==="new")list=list.filter(f=>sched(f).reps===0&&!f.s.lapses);
   list.sort((a,b)=>(b.created||0)-(a.created||0));
+  if(flt==="recent")list=list.slice(0,50);
   fillAreaSelect();
   const missing=[...facts.values()].filter(f=>!f.clinic&&!f.noClinic).length;
   $("#deckSub").textContent=`${facts.size} facts · ${facts.size-[...facts.values()].filter(f=>!f.clinic).length} with a clinic face`;
@@ -686,13 +780,14 @@ function openEditor(id){
     <div class="field"><label class="lab" for="eCq">Clinic question</label><textarea id="eCq"></textarea></div>
     <div class="field"><label class="lab" for="eCa">Clinic answer</label><textarea id="eCa"></textarea></div>
     <div class="field"><label class="lab" for="eSrc">Source</label><input type="text" id="eSrc"></div>
+    <div class="field"><label class="lab" for="ePmid">PubMed ID (optional)</label><input type="text" id="ePmid" inputmode="numeric" placeholder="e.g. 33970174, links the card straight to the study"></div>
     <div class="row"><button class="ghost" type="button" id="eReview">Review with Claude</button></div>
     <p class="status" id="eReviewStatus"></p>
     <div id="eReviewOut"></div>
     <div class="row"><button class="primary" type="button" id="eSave">Save</button><button class="ghost" type="button" id="eClose">Cancel</button></div>
     ${isNew?"":`<div class="row"><button class="ghost" type="button" id="eReset">Reset schedule</button><button class="ghost danger" type="button" id="eDel">Delete card</button></div>`}
   </div></div>`;
-  const v={eTopic:f.topic,eRq:f.recall.q,eRa:f.recall.a,eCw:c.where,eCs:c.stem,eCq:c.q,eCa:c.a,eSrc:f.src};
+  const v={eTopic:f.topic,eRq:f.recall.q,eRa:f.recall.a,eCw:c.where,eCs:c.stem,eCq:c.q,eCa:c.a,eSrc:f.src,ePmid:f.pmid};
   Object.entries(v).forEach(([k,x])=>{$("#"+k).value=x||""});
   $("#eArea").value=f.area||"";
   root.querySelectorAll("textarea").forEach(autoGrow);
@@ -703,7 +798,7 @@ function openEditor(id){
     const g=k=>$("#"+k).value.trim();
     if(!g("eRq")||!g("eRa")){toast("The recall face needs a question and an answer.");return}
     const na=$("#eArea").value||null;if(na!==(f.area||null)){f.area=na;f.areaSrc=na?"user":null}
-    f.topic=g("eTopic");f.recall={q:g("eRq"),a:g("eRa")};f.src=g("eSrc");
+    f.topic=g("eTopic");f.recall={q:g("eRq"),a:g("eRa")};f.src=g("eSrc");f.pmid=cleanPmid(g("ePmid"));
     f.clinic=g("eCs")&&g("eCq")&&g("eCa")?{where:g("eCw")||"Clinic",stem:g("eCs"),q:g("eCq"),a:g("eCa")}:null;
     if(f.clinic)delete f.noClinic;sched(f);upsert(f);if(isNew){buildQueue();if(!cur)showNext()}toast("Saved");close();
   };
@@ -749,6 +844,7 @@ ${JSON.stringify(card)}`,st,$("#eReview"));
     apply.onclick=()=>{changes.forEach(([id,[a,b]])=>{const el=$("#"+id);el.value=String(rv[a][b]);el.dispatchEvent(new Event("input"));el.closest(".field").classList.add("changed")});
       if(validArea(rv.area)&&!$("#eArea").value)$("#eArea").value=rv.area;
       if(rv.src&&!g("eSrc"))$("#eSrc").value=String(rv.src);
+      if(cleanPmid(rv.pmid)&&!g("ePmid"))$("#ePmid").value=cleanPmid(rv.pmid);
       apply.disabled=true;apply.textContent="Applied. Edit anything, then Save.";};
     row.appendChild(apply);box.appendChild(row);
   }
@@ -863,15 +959,95 @@ $("#starterBtn").onclick=()=>{
   $("#settingsStatus").className="status";$("#settingsStatus").textContent=n?`Added ${n} starter cards. Check them against your own sources.`:"Starter cards are already in your deck.";
 };
 
+/* ---------- stats ---------- */
+const dayLabel=d=>{const x=new Date(d*DAY);return x.toLocaleDateString(undefined,{month:"short",day:"numeric",timeZone:"UTC"})};
+const pct=(a,b)=>b?Math.round(a/b*100):null;
+function svgBars(vals,{h=120,labels,tips,max,color="var(--c-recall)",every=5}){
+  const n=vals.length,W=320,padL=26,padB=18,top=8,iw=W-padL-4,ih=h-padB-top;
+  const m=max||Math.max(1,...vals);const nice=m<=4?4:m<=10?10:Math.ceil(m/10)*10;
+  const bw=iw/n,gap=Math.min(2,bw*.25);
+  let g="";[0,.5,1].forEach(k=>{const y=top+ih-ih*k;g+=`<line class="grid" x1="${padL}" x2="${W-4}" y1="${y}" y2="${y}"/><text x="${padL-4}" y="${y+3}" text-anchor="end">${Math.round(nice*k)}</text>`});
+  vals.forEach((v,i)=>{const x=padL+i*bw+gap/2,w=bw-gap,bh=v?Math.max(2,ih*v/nice):0,y=top+ih-bh;
+    if(bh)g+=`<path d="M${x},${top+ih} V${y+Math.min(3,bh)} q0,-${Math.min(3,bh)} ${Math.min(3,w/2)},-${Math.min(3,bh)} H${x+w-Math.min(3,w/2)} q${Math.min(3,w/2)},0 ${Math.min(3,w/2)},${Math.min(3,bh)} V${top+ih}Z" fill="${color}"/>`;
+    g+=`<rect x="${padL+i*bw}" y="${top}" width="${bw}" height="${ih}" fill="transparent" data-tip="${esc(tips[i])}"/>`;
+    if(labels&&((i%every===0&&n-1-i>=every/2)||i===n-1))g+=`<text x="${x+w/2}" y="${h-4}" text-anchor="middle">${esc(labels[i])}</text>`});
+  return `<svg viewBox="0 0 ${W} ${h}" role="img">${g}</svg>`;
+}
+function svgLines(series,labels,tipsFn){
+  const W=320,h=150,padL=30,padR=44,padB=18,top=10,iw=W-padL-padR,ih=h-padB-top,n=labels.length;
+  const X=i=>padL+(n===1?iw/2:iw*i/(n-1)),Y=v=>top+ih-ih*v/100;
+  let g="";[0,50,100].forEach(v=>{g+=`<line class="grid" x1="${padL}" x2="${padL+iw}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${padL-4}" y="${Y(v)+3}" text-anchor="end">${v}%</text>`});
+  labels.forEach((l,i)=>{if((i%3===0&&n-1-i>=2)||i===n-1)g+=`<text x="${X(i)}" y="${h-4}" text-anchor="middle">${esc(l)}</text>`});
+  const ends=[];
+  series.forEach(se=>{let d="",pen=false;se.vals.forEach((v,i)=>{if(v==null){pen=false;return}d+=(pen?"L":"M")+X(i)+","+Y(v);pen=true});
+    g+=`<path d="${d}" fill="none" stroke="${se.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    se.vals.forEach((v,i)=>{if(v!=null)g+=`<circle cx="${X(i)}" cy="${Y(v)}" r="4" fill="${se.color}" stroke="var(--surface)" stroke-width="2"/>`});
+    const li=se.vals.map((v,i)=>v==null?-1:i).filter(i=>i>=0).pop();if(li!=null)ends.push({y:Y(se.vals[li]),x:X(li),name:se.name,v:se.vals[li]})});
+  ends.sort((a,b)=>a.y-b.y);for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<12)ends[i].y=ends[i-1].y+12;
+  ends.forEach(e=>g+=`<text class="lbl" x="${padL+iw+6}" y="${e.y+3}">${esc(e.name)}</text>`);
+  labels.forEach((l,i)=>{const x0=n===1?padL:X(i)-iw/(n-1)/2;g+=`<rect x="${Math.max(padL,x0)}" y="${top}" width="${n===1?iw:iw/(n-1)}" height="${ih}" fill="transparent" data-tip="${esc(tipsFn(i))}"/>`});
+  return `<svg viewBox="0 0 ${W} ${h}" role="img">${g}</svg>`;
+}
+function renderStats(){
+  const el=$("#statsBody");const L=meta.log||{};const t=today();
+  const day=d=>L[String(d)]||{n:0,ok:0,r:[0,0],c:[0,0],a:{}};
+  const total=Object.values(L).reduce((a,e)=>a+e.n,0);
+  const all=[...facts.values()];
+  const mature=all.filter(f=>f.s&&f.s.reps>0&&f.s.ivl>=21).length,learning=all.filter(f=>f.s&&(f.s.reps>0||f.s.lapses)&&!(f.s.ivl>=21)).length,fresh=all.length-mature-learning;
+  if(!total){el.innerHTML=`<div class="card"><div class="empty"><div class="big">No reviews yet</div><p>Study a few cards and your stats will build up here: daily reviews, recall vs clinic accuracy, topic areas, and your streak.</p></div></div>`;return}
+  let streak=0;{let d=day(t).n>0?t:t-1;while(day(d).n>0&&streak<3650){streak++;d--}}
+  let n7=0,n30=0,ok30=0,act30=0;for(let d=t-29;d<=t;d++){const e=day(d);n30+=e.n;ok30+=e.ok;if(e.n)act30++;if(d>t-7)n7+=e.n}
+  const tiles=[[streak,streak===1?"Day streak":"Day streak"],[n7,"Reviews, last 7 days"],[pct(ok30,n30)==null?"–":pct(ok30,n30)+"%","Recall rate, 30 days"],[act30+"/30","Days studied, last 30"]];
+  // daily bars
+  const days=[...Array(30)].map((_,i)=>t-29+i);
+  const bars=svgBars(days.map(d=>day(d).n),{labels:days.map(dayLabel),tips:days.map(d=>{const e=day(d);return `${dayLabel(d)}: ${e.n} review${e.n===1?"":"s"}${e.n?`, ${pct(e.ok,e.n)}% recalled`:""}`}),every:7});
+  // weekly recall vs clinic
+  const weeks=[...Array(12)].map((_,i)=>{const end=t-(11-i)*7;let r=[0,0],c=[0,0];for(let d=end-6;d<=end;d++){const e=day(d);r[0]+=e.r[0];r[1]+=e.r[1];c[0]+=e.c[0];c[1]+=e.c[1]}return {end,r,c}});
+  const lines=svgLines([{name:"Recall",color:"var(--c-recall)",vals:weeks.map(w=>pct(w.r[1],w.r[0]))},{name:"Clinic",color:"var(--c-clinic)",vals:weeks.map(w=>pct(w.c[1],w.c[0]))}],
+    weeks.map(w=>dayLabel(w.end-6)),i=>{const w=weeks[i];return `Week of ${dayLabel(w.end-6)}: recall ${pct(w.r[1],w.r[0])??"–"}% (${w.r[0]}), clinic ${pct(w.c[1],w.c[0])??"–"}% (${w.c[0]})`});
+  let R=[0,0],C=[0,0];for(let d=t-89;d<=t;d++){const e=day(d);R[0]+=e.r[0];R[1]+=e.r[1];C[0]+=e.c[0];C[1]+=e.c[1]}
+  const gapTxt=R[0]>=10&&C[0]>=10?(()=>{const dlt=pct(R[1],R[0])-pct(C[1],C[0]);return Math.abs(dlt)<5?"Your clinic-scenario recall is keeping up with plain recall.":dlt>0?`Clinic scenarios trail plain recall by ${dlt} points. The scenarios are doing their job: they expose facts that don't transfer yet.`:`You're doing better on clinic scenarios than on plain recall, by ${-dlt} points.`})():"Once you have 10+ reviews of each face, this compares how well facts transfer to clinic scenarios.";
+  // areas (90d)
+  const ar={};for(let d=t-89;d<=t;d++){const e=day(d);Object.entries(e.a||{}).forEach(([k,v])=>{const A=ar[k]||(ar[k]=[0,0]);A[0]+=v[0];A[1]+=v[1]})}
+  const arr=Object.entries(ar).filter(([,v])=>v[0]>0).sort((a,b)=>pct(a[1][1],a[1][0])-pct(b[1][1],b[1][0]));
+  const rowH=24,W=320,lw=130;
+  const areaSvg=arr.length?`<svg viewBox="0 0 ${W} ${arr.length*rowH+4}" role="img">${arr.map(([k,v],i)=>{const p=pct(v[1],v[0]),y=i*rowH+2,bw=(W-lw-46)*p/100;
+    return `<text x="0" y="${y+14}">${esc(k==="none"?"Unsorted":AREA_NAME[k]||k)}</text><rect x="${lw}" y="${y+4}" width="${W-lw-46}" height="12" rx="4" fill="var(--surface-2)"/>${bw?`<rect x="${lw}" y="${y+4}" width="${Math.max(4,bw)}" height="12" rx="4" fill="${v[0]<5?"color-mix(in srgb,var(--c-recall) 45%,var(--surface))":"var(--c-recall)"}"/>`:""}<text class="lbl" x="${W-40}" y="${y+14}">${p}%</text><text x="${W}" y="${y+14}" text-anchor="end">${v[0]}</text><rect x="0" y="${y}" width="${W}" height="${rowH}" fill="transparent" data-tip="${esc((AREA_NAME[k]||"Unsorted")+": "+v[1]+" of "+v[0]+" recalled")}"/>`}).join("")}</svg>`:`<p class="note">No reviews in the last 90 days.</p>`;
+  // forecast
+  const fdays=[...Array(14)].map((_,i)=>t+i);const fc=fdays.map(d=>all.filter(f=>f.s&&f.s.reps>0&&(d===t?f.s.due<=t:f.s.due===d)).length);
+  const fore=svgBars(fc,{labels:fdays.map((d,i)=>i===0?"Today":dayLabel(d)),tips:fdays.map((d,i)=>`${i===0?"Today (incl. overdue)":dayLabel(d)}: ${fc[i]} due`),every:4,color:"var(--muted)"});
+  // heatmap: 12 weeks, columns = weeks ending this week
+  const dow=new Date(t*DAY).getUTCDay();const start=t-dow-7*11;
+  const lv=n=>n===0?"":n<=10?"l1":n<=30?"l2":n<=60?"l3":"l4";
+  const heat=[...Array(84)].map((_,i)=>{const d=start+i;if(d>t)return `<i style="visibility:hidden"></i>`;const n=day(d).n;return `<i class="${lv(n)}" data-tip="${esc(dayLabel(d)+": "+n+" review"+(n===1?"":"s"))}"></i>`}).join("");
+  el.innerHTML=`<div class="tiles">${tiles.map(([n,l])=>`<div class="stat"><div class="n">${esc(String(n))}</div><div class="l">${esc(l)}</div></div>`).join("")}</div>
+   <div class="chartcard"><h2>Consistency</h2><p class="cap">Reviews per day, last 12 weeks</p><div class="heat">${heat}</div>
+     <div class="heatkey">Less <i style="background:var(--surface-2);border:1px solid var(--line)"></i><i class="l1" style="background:color-mix(in srgb,var(--c-recall) 25%,var(--surface))"></i><i style="background:color-mix(in srgb,var(--c-recall) 50%,var(--surface))"></i><i style="background:color-mix(in srgb,var(--c-recall) 75%,var(--surface))"></i><i style="background:var(--c-recall)"></i> More</div></div>
+   <div class="chartcard"><h2>Daily reviews</h2><p class="cap">Last 30 days</p>${bars}</div>
+   <div class="chartcard"><h2>Recall vs clinic</h2><p class="cap">Share of reviews recalled, by week. ${esc(gapTxt)}</p>${lines}
+     <div class="legend"><span><i style="background:var(--c-recall)"></i>Recall face</span><span><i style="background:var(--c-clinic)"></i>Clinic face</span></div></div>
+   <div class="chartcard"><h2>By topic area</h2><p class="cap">Share recalled, last 90 days, weakest first. Right column is review count; faded bars have fewer than 5.</p>${areaSvg}</div>
+   <div class="chartcard"><h2>Coming up</h2><p class="cap">Cards due each day, next 2 weeks</p>${fore}</div>
+   <div class="tiles"><div class="stat"><div class="n">${fresh}</div><div class="l">Not started</div></div><div class="stat"><div class="n">${learning}</div><div class="l">Learning</div></div><div class="stat"><div class="n">${mature}</div><div class="l">Mature (21d+)</div></div><div class="stat"><div class="n">${total}</div><div class="l">Reviews, all time</div></div></div>`;
+  el.querySelectorAll(".chartcard").forEach(card=>{
+    let tip=null;const show=(tg,ev)=>{if(!tip){tip=document.createElement("div");tip.className="tip";card.appendChild(tip)}tip.textContent=tg.dataset.tip;const r=card.getBoundingClientRect(),b=tg.getBoundingClientRect();
+      tip.hidden=false;const hw=tip.offsetWidth/2+4;let x=b.left+b.width/2-r.left;x=Math.max(hw,Math.min(r.width-hw,x));tip.style.left=x+"px";tip.style.top=(b.top-r.top-4)+"px";tip.hidden=false};
+    card.addEventListener("pointerover",e=>{const tg=e.target.closest("[data-tip]");if(tg)show(tg,e)});
+    card.addEventListener("pointerleave",()=>{if(tip)tip.hidden=true});
+    card.addEventListener("click",e=>{const tg=e.target.closest("[data-tip]");if(tg)show(tg,e);else if(tip)tip.hidden=true});
+  });
+}
+
 /* ---------- navigation ---------- */
 function go(v){
   document.querySelectorAll("nav.tabs button").forEach(x=>x.toggleAttribute("aria-current",x.dataset.v===v));
   document.querySelectorAll("nav.tabs button[aria-current]").forEach(x=>x.setAttribute("aria-current","page"));
-  ["study","ask","distill","deck"].forEach(k=>$("#v-"+k).hidden=k!==v);
+  ["study","ask","distill","stats","deck"].forEach(k=>$("#v-"+k).hidden=k!==v);if(v==="stats")renderStats();
   if(v==="deck")renderDeck();if(v==="study")renderStudy();window.scrollTo(0,0);
 }
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.v));
 
+if(window.FR_STANDALONE)$("#askNote").textContent="Claude searches PubMed, uses only peer-reviewed studies, and links each one. Still check key numbers before you rely on them.";
 function renderAll(){
   facts.forEach(sched);
   $("#newPerDay").value=meta.settings.newPerDay;$("#faceMode").value=meta.settings.faceMode;
