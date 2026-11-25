@@ -25,7 +25,7 @@ s=head+s
 s=rep(s,'</style>\n','html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area-inset-top,0px)}img{max-width:100%}\n</style>\n</head>\n<body>\n')
 # settings: API key
 s=rep(s,'''    <div class="section">
-      <h2>Settings</h2>''','''    <div class="section">
+      <h2>Study and Claude</h2>''','''    <div class="section">
       <h2>Claude API key</h2>
       <p class="note">Ask, Distill and the clinic-face writer use your key from console.anthropic.com. It is saved only on this device and sent only to Anthropic.</p>
       <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off" aria-label="Claude API key">
@@ -34,7 +34,7 @@ s=rep(s,'''    <div class="section">
     </div>
 
     <div class="section">
-      <h2>Settings</h2>''')
+      <h2>Study and Claude</h2>''')
 s=rep(s,'''const errMsg=''','''ERR.no_key="Add your Claude API key in Deck › Claude API key first.";ERR.bad_key="Your API key was rejected. Check it in Deck › Claude API key.";ERR.offline="No internet connection. Studying works offline, but drafting cards needs a connection.";ERR.invalid_request="Claude couldn't accept that request. Try a shorter text or check your account's credit.";
 const errMsg=''')
 s=rep(s,'''setSync("ok","Synced");

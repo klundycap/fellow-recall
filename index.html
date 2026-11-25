@@ -215,6 +215,10 @@ nav.tabs button[aria-current=page]{color:var(--fg);background:var(--surface-2)}
 .verdict.correct{color:var(--good)}.verdict.partial{color:var(--hard)}.verdict.incorrect{color:var(--again)}
 .rate button.suggested{border:2px solid currentColor;border-color:var(--fg)}
 .kv input[type=checkbox]{width:22px;height:22px}
+.gear{border:1px solid var(--line);background:var(--surface);border-radius:12px;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;color:var(--fg)}
+.gear svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+#v-settings .section:first-child{margin-top:0}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--recall);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -278,6 +282,12 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
     <div id="statsBody"></div>
   </section>
 
+  <!-- SETTINGS (sections are moved in here at startup) -->
+  <section class="view" id="v-settings" hidden>
+    <header class="top"><div><button class="backbtn" type="button" id="settingsBack"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Back</button><h1>Settings</h1><p class="sub">Your API key, study options, how Claude writes cards, import and backup.</p></div></header>
+    <div id="settingsBody" style="display:flex;flex-direction:column;gap:6px"></div>
+  </section>
+
   <!-- DECK -->
   <section class="view" id="v-deck" hidden>
     <header class="top"><div><h1>Deck</h1><p class="sub" id="deckSub">Blue is the recall face, amber is the clinic face.</p></div>
@@ -324,7 +334,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
     </div>
 
     <div class="section">
-      <h2>Settings</h2>
+      <h2>Study and Claude</h2>
       <div class="kv"><label for="newPerDay">New cards per day</label><input type="number" id="newPerDay" min="0" max="500" value="20"></div>
       <div class="kv"><label for="cardLen">Card length when Claude writes</label><select id="cardLen" style="width:auto"><option value="short">Short</option><option value="standard">Standard</option></select></div>
       <div class="field"><label class="lab" for="focusTxt">Your instructions for Claude</label><textarea id="focusTxt" style="min-height:80px" maxlength="1500" placeholder="Used every time Claude writes or reviews a card. e.g. Focus on what changes management in clinic. Prefer doses and numeric thresholds. Skip basic science unless it's board-tested."></textarea></div>
@@ -351,8 +361,8 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
 
 <div id="sheetRoot"></div>
 
-<script src="anthropic-sdk.js?v=7"></script>
-<script src="shim.js?v=7"></script>
+<script src="anthropic-sdk.js?v=8"></script>
+<script src="shim.js?v=8"></script>
 <script>
 "use strict";
 const use=n=>{try{return window.claude?Promise.resolve(window.claude.use(n)).catch(()=>null):Promise.resolve(null)}catch(e){return Promise.resolve(null)}};
@@ -1188,13 +1198,30 @@ function renderStats(){
 }
 
 /* ---------- navigation ---------- */
+let lastView="study";
 function go(v){
+  if(v!=="settings")lastView=v;
   document.querySelectorAll("nav.tabs button").forEach(x=>x.toggleAttribute("aria-current",x.dataset.v===v));
   document.querySelectorAll("nav.tabs button[aria-current]").forEach(x=>x.setAttribute("aria-current","page"));
-  ["study","ask","distill","stats","deck"].forEach(k=>$("#v-"+k).hidden=k!==v);if(v==="stats")renderStats();
+  ["study","ask","distill","stats","deck","settings"].forEach(k=>$("#v-"+k).hidden=k!==v);if(v==="settings")renderDeck();if(v==="stats")renderStats();
   if(v==="deck")renderDeck();if(v==="study")renderStudy();window.scrollTo(0,0);
 }
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.v));
+// Settings page: gather the setup sections and put a gear in every page header
+(function(){
+  const body=$("#settingsBody"),secs=[...document.querySelectorAll("#v-deck .section")];
+  ["Claude API key","Study and Claude","Import","Clinic faces for imported cards","Sort into topic areas"].forEach(t=>{const x=secs.find(e=>e.querySelector("h2")&&e.querySelector("h2").textContent===t);if(x)body.appendChild(x)});
+  secs.forEach(x=>{if(x.parentNode!==body)body.appendChild(x)});
+  const GEAR='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+  ["study","ask","distill","stats","deck"].forEach(v=>{const h=document.querySelector("#v-"+v+" header.top");if(!h)return;
+    const b=document.createElement("button");b.type="button";b.className="gear";b.setAttribute("aria-label","Settings");b.title="Settings";b.innerHTML=GEAR;b.onclick=()=>go("settings");
+    const right=h.children[1];
+    if(right){const wrap=document.createElement("div");wrap.className="hdr-right";h.replaceChild(wrap,right);const row=document.createElement("div");row.style.cssText="display:flex;gap:8px;align-items:center";
+      if(right.classList.contains("hdr-right")||right.tagName==="DIV"&&right.querySelector("#addBtn2")){const nb=right.querySelector("#addBtn2");const sy=right.querySelector("#sync");row.append(nb,b);wrap.append(row);if(sy)wrap.append(sy)}
+      else{row.append(right,b);wrap.append(row)}}
+    else h.appendChild(b)});
+  $("#settingsBack").onclick=()=>go(lastView);
+})();
 
 if(window.FR_STANDALONE)$("#askNote").textContent="Claude searches PubMed, uses only peer-reviewed studies, and links each one. Still check key numbers before you rely on them.";
 function renderAll(){
