@@ -52,14 +52,19 @@ async function ask(prompt,opts){
   // Opus: server-side fallback on refusals. Haiku 5.5 has no server-side fallback.
   if(model===MODEL){req.betas=["server-side-fallback-2026-07-01"];req.fallbacks="default"}
   // Ask: let Claude search PubMed so citations and PMIDs are real
-  if(opts.web)req.tools=[{type:"web_search_20260209",name:"web_search",max_uses:6,allowed_domains:["pubmed.ncbi.nlm.nih.gov","ncbi.nlm.nih.gov"]}];
+  // the dynamic-filtering search tool needs Opus; Haiku uses the basic search tool
+  if(opts.web)req.tools=[{type:model===MODEL?"web_search_20260209":"web_search_20250305",name:"web_search",max_uses:6,allowed_domains:["pubmed.ncbi.nlm.nih.gov","ncbi.nlm.nih.gov"]}];
   try{
     for(let round=0;round<5;round++){
       msg=await getClient().beta.messages.create(req);
       if(msg.stop_reason!=="pause_turn")break;
       messages.push({role:"assistant",content:msg.content});   // server tool paused mid-turn: resume it
     }
-  }catch(e){throw mapErr(e)}
+  }catch(e){
+    // if this model rejects the search tool, answer once without searching rather than failing
+    if(req.tools&&e instanceof window.Anthropic.BadRequestError&&messages.length===1){
+      delete req.tools;try{msg=await getClient().beta.messages.create(req)}catch(e2){throw mapErr(e2)}
+    }else throw mapErr(e)}
   if(msg.stop_reason==="refusal")throw {code:"refused",message:"Declined"};
   // with web search the final answer comes after the tool blocks; keep only text after the last tool result
   const blocks=msg.content||[];let lastTool=-1;blocks.forEach((b,i)=>{if(b.type!=="text")lastTool=i});
