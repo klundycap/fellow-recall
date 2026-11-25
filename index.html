@@ -303,7 +303,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
     <div class="toolbar">
       <input type="search" id="deckSearch" placeholder="Search cards" aria-label="Search cards">
       <select id="deckFilter" aria-label="Filter" style="width:auto">
-        <option value="all">All</option><option value="recent">Last 50 added</option><option value="due">Due</option><option value="noclinic">Plain facts</option><option value="case">Case-based</option><option value="reword">Reworded each time</option><option value="deeper">Gone deeper</option><option value="new">New</option>
+        <option value="all">All</option><option value="recent">Last 50 added</option><option value="due">Due</option><option value="noclinic">Plain facts</option><option value="case">Case-based</option><option value="reword">Reworded each time</option><option value="fixed">Fixed wording</option><option value="deeper">Gone deeper</option><option value="new">New</option>
       </select>
     </div>
     <div class="toolbar">
@@ -347,6 +347,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
       <div class="kv"><label for="cardLen">Card length when Claude writes</label><select id="cardLen" style="width:auto"><option value="short">Short</option><option value="standard">Standard</option></select></div>
       <div class="field"><label class="lab" for="focusTxt">Your instructions for Claude</label><textarea id="focusTxt" style="min-height:80px" maxlength="1500" placeholder="Used every time Claude writes or reviews a card. e.g. Focus on what changes management in clinic. Prefer doses and numeric thresholds. Skip basic science unless it's board-tested."></textarea></div>
       <div class="kv"><label for="varyStems">Fresh patient each time (clinic cards)</label><input type="checkbox" id="varyStems"></div>
+      <div class="kv"><label for="rewordDef">Reword questions each time (default for cards)</label><input type="checkbox" id="rewordDef"></div>
       <div class="kv"><label for="deepenOn">Go deeper once a card is mastered</label><input type="checkbox" id="deepenOn"></div>
       <div class="kv"><label for="deepenAt">A card counts as mastered at</label><select id="deepenAt" style="width:auto"><option value="21">3 weeks between reviews</option><option value="30">1 month between reviews</option><option value="60">2 months between reviews</option></select></div>
       <div class="kv"><label for="freeRecall">Type your answer first</label><select id="freeRecall" style="width:auto"><option value="off">Off</option><option value="clinic">Clinic cards</option><option value="all">All cards</option></select></div>
@@ -371,8 +372,8 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
 
 <div id="sheetRoot"></div>
 
-<script src="anthropic-sdk.js?v=9"></script>
-<script src="shim.js?v=9"></script>
+<script src="anthropic-sdk.js?v=10"></script>
+<script src="shim.js?v=10"></script>
 <script>
 "use strict";
 const use=n=>{try{return window.claude?Promise.resolve(window.claude.use(n)).catch(()=>null):Promise.resolve(null)}catch(e){return Promise.resolve(null)}};
@@ -427,7 +428,7 @@ const CHUNK_BYTES=150000;
 let facts=new Map();        // id -> fact
 let chunkOf=new Map();      // id -> chunk index
 let chunks=[];              // [{ids:Set}]
-let meta={settings:{newPerDay:20,faceMode:"alt",cardLength:"short",focus:"",varyStems:true,freeRecall:"clinic",quickModel:"claude-haiku-5-5",askModel:"claude-opus-5-5",writeModel:"claude-haiku-5-5",reviewSearch:true,deepen:true,deepenAt:21},newLog:{day:0,count:0},chunkCount:0};
+let meta={settings:{newPerDay:20,faceMode:"alt",cardLength:"short",focus:"",varyStems:true,freeRecall:"clinic",quickModel:"claude-haiku-5-5",askModel:"claude-opus-5-5",writeModel:"claude-haiku-5-5",reviewSearch:true,deepen:true,deepenAt:21,rewordDefault:true},newLog:{day:0,count:0},chunkCount:0};
 let db=null,me=null,mode="local";
 const dirty=new Set();let metaDirty=false;let saveT=null;
 
@@ -590,7 +591,8 @@ document.addEventListener("click",e=>{if(!userActed&&e.target.closest("#v-study"
 const quickOpts=()=>{const o={modelTier:"quick"};if(window.FR_STANDALONE)o.model=meta.settings.quickModel||"claude-haiku-5-5";return o};
 function wantsTyping(f,fc){const m=meta.settings.freeRecall||"clinic";return m==="all"||(m==="clinic"&&fc==="clinic")}
 const vKey=(f,fc)=>f.id+":"+fc;
-function wantsVariant(f,fc){return fc==="clinic"?!!f.clinic&&(meta.settings.varyStems!==false||!!f.reword):!!f.reword}
+const rw=f=>f.reword===undefined?meta.settings.rewordDefault!==false:!!f.reword;
+function wantsVariant(f,fc){return fc==="clinic"?!!f.clinic&&(meta.settings.varyStems!==false||!!f.reword):rw(f)}
 async function prefetchVariant(f){
   if(!f)return;const fc=pickFace(f),k=vKey(f,fc);
   if(!wantsVariant(f,fc)||variants.has(k))return;
@@ -932,7 +934,8 @@ function renderDeck(){
   if(flt==="due")list=list.filter(f=>sched(f).reps>0&&f.s.due<=t);
   if(flt==="noclinic")list=list.filter(f=>!f.clinic);
   if(flt==="case")list=list.filter(f=>f.clinic);
-  if(flt==="reword")list=list.filter(f=>f.reword);
+  if(flt==="reword")list=list.filter(f=>rw(f));
+  if(flt==="fixed")list=list.filter(f=>!rw(f));
   if(flt==="deeper")list=list.filter(f=>f.level);
   if(flt==="new")list=list.filter(f=>sched(f).reps===0&&!f.s.lapses);
   list.sort((a,b)=>(b.created||0)-(a.created||0));
@@ -945,7 +948,7 @@ function renderDeck(){
   const el=$("#deckList");
   if(!list.length){el.innerHTML=`<p class="more">${facts.size?"No cards match.":"No cards yet. Import from Anki below, or use Ask and Distill."}</p>`;return}
   el.innerHTML=list.slice(0,deckLimit).map(f=>{const s=sched(f);const due=s.reps===0?(s.lapses?"relearn":"new"):s.due<=t?"due":"in "+(s.due-t)+"d";
-    return `<button type="button" class="item" data-id="${esc(f.id)}"><div><div class="t">${esc(f.recall.q.length>90?f.recall.q.slice(0,88)+"…":f.recall.q)}</div><div class="s">${esc([f.area?AREA_NAME[f.area]:"Unsorted",f.topic,f.reword?"reworded":""].filter(Boolean).join(" · "))}${f.level?`<span class="lvl">L${f.level+1}</span>`:""}</div><div class="faces"><i class="r"></i><i class="${f.clinic?"c":""}"></i></div></div><div class="due">${due}</div></button>`}).join("")+
+    return `<button type="button" class="item" data-id="${esc(f.id)}"><div><div class="t">${esc(f.recall.q.length>90?f.recall.q.slice(0,88)+"…":f.recall.q)}</div><div class="s">${esc([f.area?AREA_NAME[f.area]:"Unsorted",f.topic,rw(f)?"":"fixed wording"].filter(Boolean).join(" · "))}${f.level?`<span class="lvl">L${f.level+1}</span>`:""}</div><div class="faces"><i class="r"></i><i class="${f.clinic?"c":""}"></i></div></div><div class="due">${due}</div></button>`}).join("")+
     (list.length>deckLimit?`<button type="button" class="ghost" id="moreBtn">Show more (${list.length-deckLimit} left)</button>`:"");
   el.querySelectorAll(".item").forEach(b=>b.onclick=()=>openEditor(b.dataset.id));
   const mb=$("#moreBtn");if(mb)mb.onclick=()=>{deckLimit+=100;renderDeck()};
@@ -1023,7 +1026,7 @@ function openEditor(id){
     $("#eTypeNote").textContent=t==="fact"?"Question and answer only, no patient scenario. Best for things you just need to know cold, like a receptor or a mechanism.":($("#eCs").value.trim()?"Alternates between the plain question and a patient scenario.":"Write the scenario below, or tap Review with Claude and it will draft one.")};
   root.querySelectorAll(".seg [data-t]").forEach(b=>b.onclick=()=>setType(b.dataset.t));
   setType(eType);
-  $("#eReword").checked=!!f.reword;$("#eDeepen").checked=f.deepen!==false;
+  $("#eReword").checked=rw(f);const rw0=rw(f);$("#eDeepen").checked=f.deepen!==false;
   const lv=$("#eLevels");
   const drawLevels=()=>{const L=f.levels||[];
     if(isNew){lv.innerHTML="";return}
@@ -1049,7 +1052,7 @@ function openEditor(id){
     const filled=g("eCs")&&g("eCq")&&g("eCa")?{where:g("eCw")||"Clinic",stem:g("eCs"),q:g("eCq"),a:g("eCa")}:null;
     if(eType==="case"){f.clinic=filled;f.noClinic=false;delete f.clinicStash}
     else{if(filled||f.clinic)f.clinicStash=filled||f.clinic;f.clinic=null;f.noClinic=true}
-    f.reword=$("#eReword").checked||undefined;if(!f.reword)delete f.reword;
+    if($("#eReword").checked!==rw0)f.reword=$("#eReword").checked;
     if($("#eDeepen").checked)delete f.deepen;else f.deepen=false;
     variants.delete(vKey(f,"recall"));variants.delete(vKey(f,"clinic"));
     if(cur&&cur.id===f.id&&!shown)face=pickFace(f);
@@ -1210,6 +1213,7 @@ $("#reviewSearch").onchange=e=>{meta.settings.reviewSearch=e.target.checked;touc
 $("#cardLen").onchange=e=>{meta.settings.cardLength=e.target.value;touchMeta();toast("Saved")};
 let focusT;$("#focusTxt").oninput=e=>{clearTimeout(focusT);focusT=setTimeout(()=>{meta.settings.focus=e.target.value.slice(0,1500);touchMeta()},600)};
 $("#focusTxt").onchange=e=>{meta.settings.focus=e.target.value.slice(0,1500);touchMeta();toast("Saved")};
+$("#rewordDef").onchange=e=>{meta.settings.rewordDefault=e.target.checked;variants.clear();touchMeta();toast(e.target.checked?"Cards are reworded unless you turn it off on a card":"Cards keep their wording unless you turn rewording on for a card")};
 $("#deepenOn").onchange=e=>{meta.settings.deepen=e.target.checked;touchMeta();toast("Saved")};
 $("#deepenAt").onchange=e=>{meta.settings.deepenAt=+e.target.value||21;touchMeta();toast("Saved")};
 $("#faceMode").onchange=e=>{meta.settings.faceMode=e.target.value;touchMeta();if(cur){face=pickFace(cur);renderStudy()}};
@@ -1345,7 +1349,7 @@ document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>go(b.datas
 if(window.FR_STANDALONE)$("#askNote").textContent="Claude searches PubMed, uses only peer-reviewed studies, and links each one. Still check key numbers before you rely on them.";
 function renderAll(){
   facts.forEach(sched);
-  $("#newPerDay").value=meta.settings.newPerDay;$("#cardLen").value=meta.settings.cardLength||"short";$("#varyStems").checked=meta.settings.varyStems!==false;$("#freeRecall").value=meta.settings.freeRecall||"clinic";if(!meta.settings.quickModelChosen)meta.settings.quickModel="claude-haiku-5-5";$("#quickModel").value=meta.settings.quickModel||"claude-haiku-5-5";$("#askModel").value=meta.settings.askModel||"claude-opus-5-5";$("#writeModel").value=meta.settings.writeModel||"claude-haiku-5-5";$("#reviewSearch").checked=meta.settings.reviewSearch!==false;$("#deepenOn").checked=meta.settings.deepen!==false;$("#deepenAt").value=String(meta.settings.deepenAt||21);if(document.activeElement!==$("#focusTxt"))$("#focusTxt").value=meta.settings.focus||"";$("#faceMode").value=meta.settings.faceMode;
+  $("#newPerDay").value=meta.settings.newPerDay;$("#cardLen").value=meta.settings.cardLength||"short";$("#varyStems").checked=meta.settings.varyStems!==false;$("#freeRecall").value=meta.settings.freeRecall||"clinic";if(!meta.settings.quickModelChosen)meta.settings.quickModel="claude-haiku-5-5";$("#quickModel").value=meta.settings.quickModel||"claude-haiku-5-5";$("#askModel").value=meta.settings.askModel||"claude-opus-5-5";$("#writeModel").value=meta.settings.writeModel||"claude-haiku-5-5";$("#reviewSearch").checked=meta.settings.reviewSearch!==false;$("#deepenOn").checked=meta.settings.deepen!==false;$("#rewordDef").checked=meta.settings.rewordDefault!==false;$("#deepenAt").value=String(meta.settings.deepenAt||21);if(document.activeElement!==$("#focusTxt"))$("#focusTxt").value=meta.settings.focus||"";$("#faceMode").value=meta.settings.faceMode;
   done=0;good=0;cur=null;buildQueue();showNext();if(!$("#v-deck").hidden)renderDeck();
 }
 if(window.FR_KEY){
