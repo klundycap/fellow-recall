@@ -348,8 +348,8 @@ html{-webkit-text-size-adjust:100%}body{margin:0}:root{padding-top:env(safe-area
 
 <div id="sheetRoot"></div>
 
-<script src="anthropic-sdk.js?v=5"></script>
-<script src="shim.js?v=5"></script>
+<script src="anthropic-sdk.js?v=6"></script>
+<script src="shim.js?v=6"></script>
 <script>
 "use strict";
 const use=n=>{try{return window.claude?Promise.resolve(window.claude.use(n)).catch(()=>null):Promise.resolve(null)}catch(e){return Promise.resolve(null)}};
@@ -404,7 +404,7 @@ const CHUNK_BYTES=150000;
 let facts=new Map();        // id -> fact
 let chunkOf=new Map();      // id -> chunk index
 let chunks=[];              // [{ids:Set}]
-let meta={settings:{newPerDay:20,faceMode:"alt",cardLength:"short",focus:"",varyStems:true,freeRecall:"clinic",quickModel:"claude-opus-5-5"},newLog:{day:0,count:0},chunkCount:0};
+let meta={settings:{newPerDay:20,faceMode:"alt",cardLength:"short",focus:"",varyStems:true,freeRecall:"clinic",quickModel:"claude-haiku-5-5"},newLog:{day:0,count:0},chunkCount:0};
 let db=null,me=null,mode="local";
 const dirty=new Set();let metaDirty=false;let saveT=null;
 
@@ -562,7 +562,7 @@ function showNext(){shown=false;typedAns="";draftAns="";answerGrade=null;cur=nul
 const variants=new Map();          // fact id -> {status:"pending"|"ok"|"fail", v}
 let typedAns="",draftAns="",answerGrade=null,userActed=false;
 document.addEventListener("click",e=>{if(!userActed&&e.target.closest("#v-study")){userActed=true;setTimeout(prefetchAhead,0)}},true);
-const quickOpts=()=>{const o={modelTier:"quick"};if(window.FR_STANDALONE)o.model=meta.settings.quickModel||"claude-opus-5-5";return o};
+const quickOpts=()=>{const o={modelTier:"quick"};if(window.FR_STANDALONE)o.model=meta.settings.quickModel||"claude-haiku-5-5";return o};
 function wantsTyping(f,fc){const m=meta.settings.freeRecall||"clinic";return m==="all"||(m==="clinic"&&fc==="clinic")}
 async function prefetchVariant(f){
   if(!f||!f.clinic||meta.settings.varyStems===false||variants.has(f.id)||pickFace(f)!=="clinic")return;
@@ -1072,7 +1072,7 @@ $("#importCancel").onclick=()=>{pending=null;$("#importRow").hidden=true;$("#imp
 $("#newPerDay").onchange=e=>{meta.settings.newPerDay=Math.max(0,Math.min(500,parseInt(e.target.value,10)||0));touchMeta();cur=null;buildQueue();showNext()};
 $("#varyStems").onchange=e=>{meta.settings.varyStems=e.target.checked;if(!e.target.checked)variants.clear();touchMeta();toast("Saved")};
 $("#freeRecall").onchange=e=>{meta.settings.freeRecall=e.target.value;touchMeta();toast("Saved")};
-$("#quickModel").onchange=e=>{meta.settings.quickModel=e.target.value;touchMeta();toast("Saved")};
+$("#quickModel").onchange=e=>{meta.settings.quickModel=e.target.value;meta.settings.quickModelChosen=true;touchMeta();toast("Saved")};
 if(window.FR_STANDALONE)$("#quickModelRow").hidden=false;
 $("#cardLen").onchange=e=>{meta.settings.cardLength=e.target.value;touchMeta();toast("Saved")};
 let focusT;$("#focusTxt").oninput=e=>{clearTimeout(focusT);focusT=setTimeout(()=>{meta.settings.focus=e.target.value.slice(0,1500);touchMeta()},600)};
@@ -1193,7 +1193,7 @@ document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>go(b.datas
 if(window.FR_STANDALONE)$("#askNote").textContent="Claude searches PubMed, uses only peer-reviewed studies, and links each one. Still check key numbers before you rely on them.";
 function renderAll(){
   facts.forEach(sched);
-  $("#newPerDay").value=meta.settings.newPerDay;$("#cardLen").value=meta.settings.cardLength||"short";$("#varyStems").checked=meta.settings.varyStems!==false;$("#freeRecall").value=meta.settings.freeRecall||"clinic";$("#quickModel").value=meta.settings.quickModel||"claude-opus-5-5";if(document.activeElement!==$("#focusTxt"))$("#focusTxt").value=meta.settings.focus||"";$("#faceMode").value=meta.settings.faceMode;
+  $("#newPerDay").value=meta.settings.newPerDay;$("#cardLen").value=meta.settings.cardLength||"short";$("#varyStems").checked=meta.settings.varyStems!==false;$("#freeRecall").value=meta.settings.freeRecall||"clinic";if(!meta.settings.quickModelChosen)meta.settings.quickModel="claude-haiku-5-5";$("#quickModel").value=meta.settings.quickModel||"claude-haiku-5-5";if(document.activeElement!==$("#focusTxt"))$("#focusTxt").value=meta.settings.focus||"";$("#faceMode").value=meta.settings.faceMode;
   done=0;good=0;cur=null;buildQueue();showNext();if(!$("#v-deck").hidden)renderDeck();
 }
 if(window.FR_KEY){
