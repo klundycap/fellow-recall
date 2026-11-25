@@ -46,7 +46,7 @@ function parseJson(text){
 async function ask(prompt,opts){
   opts=opts||{};
   let msg;const messages=[{role:"user",content:prompt}];
-  const model=opts.model==="claude-haiku-5-5"?"claude-haiku-5-5":MODEL;
+  const model=opts.model===MODEL?MODEL:"claude-haiku-5-5";
   const req={model,max_tokens:opts.modelTier==="quick"?4000:16000,
       output_config:{effort:opts.modelTier==="quick"?"low":"medium"},messages};
   // Opus: server-side fallback on refusals. Haiku 5.5 has no server-side fallback.
