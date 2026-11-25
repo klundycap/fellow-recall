@@ -46,9 +46,11 @@ function parseJson(text){
 async function ask(prompt,opts){
   opts=opts||{};
   let msg;const messages=[{role:"user",content:prompt}];
-  const req={model:MODEL,max_tokens:16000,
-      output_config:{effort:opts.modelTier==="quick"?"low":"medium"},
-      betas:["server-side-fallback-2026-07-01"],fallbacks:"default",messages};
+  const model=opts.model==="claude-haiku-5-5"?"claude-haiku-5-5":MODEL;
+  const req={model,max_tokens:opts.modelTier==="quick"?4000:16000,
+      output_config:{effort:opts.modelTier==="quick"?"low":"medium"},messages};
+  // Opus: server-side fallback on refusals. Haiku 5.5 has no server-side fallback.
+  if(model===MODEL){req.betas=["server-side-fallback-2026-07-01"];req.fallbacks="default"}
   // Ask: let Claude search PubMed so citations and PMIDs are real
   if(opts.web)req.tools=[{type:"web_search_20260209",name:"web_search",max_uses:6,allowed_domains:["pubmed.ncbi.nlm.nih.gov","ncbi.nlm.nih.gov"]}];
   try{
